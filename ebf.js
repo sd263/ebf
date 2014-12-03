@@ -4,6 +4,7 @@ var stageRight = 1200;
 var keys = {};
 var lives = 5; 
 var scoreMultiplier = 5;
+var roundNumber = 1;
 
 
 	function init() {
@@ -14,13 +15,7 @@ var scoreMultiplier = 5;
 	function homeScreen(){
 			
 			stage.removeAllChildren();
-			
-			var circle = new createjs.Shape();
-			circle.graphics.beginFill("red").drawCircle(0, 0, 50);
-			circle.x = 250;
-			circle.y = 250;
-			stage.addChild(circle);
-			
+						
 			var title = new createjs.Text("Epic Boss Fight", "80px Arial", "#ff7700"); 
 			title.x = 200;
 			title.y = 40;
@@ -62,14 +57,20 @@ var scoreMultiplier = 5;
 
 	function renderLevel(level) {
 		if(level == 0){  // mario level
-			var counter = 0;
+			var end = false;
+			var won = false;
+			
 			var levelTime = 2;  // 5s to complete level
 			var roundTime = scoreMultiplier * levelTime;
 			var heroJump = false; // would ideally be an attribute of hero
 		
 			var floor = new createjs.Shape();
-			floor.graphics.beginFill("#ff0000").drawRect(0, stageBottom-100, stageRight, 100);
+			floor.graphics.beginFill("#ff0000").drawRect(0, stageBottom-100, stageRight- 100, 100);
 			stage.addChild(floor);
+			
+			var end = new createjs.Shape();
+			floor.graphics.beginFill("#111").drawRect(stageRight-100, stageBottom-100, stageRight, 100);
+			stage.addChild(end);
 			
 			var hero = new createjs.Shape();
 			hero.graphics.beginFill("#AAA").drawRect(50, stageBottom-180, 30, 80);
@@ -80,30 +81,30 @@ var scoreMultiplier = 5;
 			timeLeft.y = 40;
 			stage.addChild(timeLeft);
 
+			this.document.onkeydown = keydown;
+			this.document.onkeyup = keyup;
 			
 			createjs.Ticker.on("tick", tick);
 			createjs.Ticker.setFPS(60);
-			
-			this.document.onkeydown = keydown;
-			this.document.onkeyup = keyup;
+					
+		function tick(event) {
 				
-
-			function tick(event) {
-				counter =  parseInt(this.getTime()/1000);
+				var counter =  parseInt(this.getTime()/1000);
+				console.log(counter);
 				timeLeft.text = roundTime - counter;
 				
-		
-				if(roundTime - counter <= 0){
+				if(roundTime - counter<= 0){
 					event.remove();
-					roundResult(false,1);
-					// return false;  // leaves the level and reports result
+					roundNumber++;
+					roundResult(false);
+				//	return;  // leaves the level and reports result
 				}
 					
-				else if(hero.x >= stageRight-200){
+				else if(hero.x >= stageRight-100){
 					event.remove();
-					roundResult(true,1); 
-						
-					// return true;  // leaves the level and reports result
+					roundNumber++;
+					roundResult(true); 
+				//	 return;  // leaves the level and reports result
 				} 
 					
 		
@@ -112,8 +113,7 @@ var scoreMultiplier = 5;
 					if(hero.y <= -200)
 						heroJump = false;  // begin falling
 				}
-	
-				if(hero.y < 0 && heroJump == false){
+				else if(hero.y < 0 && heroJump == false){ // go down
 					hero.y += 8;
 				}
 	
@@ -122,15 +122,18 @@ var scoreMultiplier = 5;
 				if (keys[39]) hero.x += 25;
 				
 				stage.update(event);
-			
 			}
+			
 				
 		}
+	
+		
 	}
 
-	function roundResult(result,roundNumber){
+
+	function roundResult(result){
+		console.log("round end");
 		stage.removeAllChildren();
-		
 		
 			var outcome = new createjs.Text( "", "80px Arial", "#ff7700"); 
 			outcome.x = 200;
@@ -150,7 +153,7 @@ var scoreMultiplier = 5;
 		else if(result == false)
 			outcome.text = "you loose";
 			
-		sleep(1000);	
+		sleep(1500);	
 		renderLevel(0);	
 			
 	}
